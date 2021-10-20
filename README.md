@@ -3,12 +3,12 @@ In this repository, we develop use two machine learning algorithms (namely DT an
 
 The code is written in Python 3, required packages:
 
-numpy
+#numpy
 
-scipy
+#scipy
 
-matplotlib
+#matplotlib
 
-time
+#time
 
-sklearn
+#sklearn

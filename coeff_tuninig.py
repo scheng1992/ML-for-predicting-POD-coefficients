@@ -3,12 +3,9 @@ import numpy as np
 import scipy
 import math
 import matplotlib.pyplot as plt
-#from sympy import Symbol, nsolve, solve
-#from sympy.solvers import solve
 
 import time
 
-# check scikit-learn version
 
 # check scikit-learn version
 import sklearn
@@ -19,56 +16,31 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.preprocessing import normalize
 #input
 
-step = 1
 
-field_data1 = np.loadtxt('data/powerIAEA10000.txt')
 
-field_data2 = np.loadtxt('data/powerIAEA8480.txt')
-
-field_data = np.concatenate((field_data1,field_data2),axis = 0)
-
-input_data = np.loadtxt('data/inpower18480.txt')
-
-input_data = input_data[:,[1,2,3,4]]
-
+#load learning data
+field_data = np.loadtxt('....txt')
+input_data = np.loadtxt('....txt')
+input_data = input_data[:,[1,2,3,4]] #chosing parameters as ML input
 #output
-coeff = np.loadtxt('data/powerIAEA18480coef.txt')
+coeff = np.loadtxt('...txt')
 
 ##############################################################
-field_extra = np.loadtxt('data/powerIAEA5517.txt')
+field_extra = np.loadtxt('....txt') #loading validation dataset
 
-coeff_extra = np.loadtxt('data/powerIAEAtrain18480test5517coeftest.txt')
+coeff_extra = np.loadtxt('.....txt')
 
-input_extra = np.loadtxt('data/inpower5517.txt')
+input_extra = np.loadtxt('....txt')
 
-input_extra = input_extra[:3500,[1,2,3,4]]
-
-# field_data = np.concatenate((field_data,field_extra ),axis = 0)
-
-# coeff = np.concatenate((coeff,coeff_extra),axis = 0)
-
-# input_data = np.concatenate((input_data,input_extra ),axis = 0)
-
-# input_data = normalize(input_data, axis=1, norm='l2')
-
-# plt.plot(input_extra[:,1])
-# plt.plot(input_data[:,1],'r')
-# plt.show()
+input_extra = input_extra[:3000,[1,2,3,4]]
 
 ##############################################################
-
+#shuffle the input dataset for trainning
 c = np.c_[input_data.reshape(len(input_data), -1), 
           coeff.reshape(len(coeff), -1), field_data.reshape(len(field_data), -1)]
 
-#########################################################################
-# local train
 
-#L = [y for y in range(input_data.shape[0]) if input_data[y,3] < 500]
-
-#c = c[L,:]
-#weights
 np.random.shuffle(c)
-
 input_data = c[:, :input_data.size//len(input_data)].reshape(input_data.shape)
 # coeff  = c[:, input_data.size://
 #            len(input_data):].reshape(coeff.shape)
@@ -76,44 +48,28 @@ input_data = c[:, :input_data.size//len(input_data)].reshape(input_data.shape)
 coeff = c[:,4:154]
 
 field_data = c[:,154:]
-
-eigenvalue = np.loadtxt('data/powerIAEA18480eigenvalue.txt')
+#load POD coefficients 
+eigenvalue = np.loadtxt('.....txt')
 
 ########################################################################
-
+#seperate the training and test dataset
 train_input = input_data [:15000]
-
 train_output_all = coeff [:15000]
-
 test_input = input_data [15000:]
-
 true_test_output_all = coeff [15000:]
-
 original_test_field = field_data[15000:]
 
 error_KNN_all = []
-
 error_DT_all = []
-
 std_KNN_all = []
-
 std_DT_all = []
-
 error_linear_all = []
-
 error_pod_all = []
-
 KNN_time = []
-
 linear_time = []
-
 DT_time = []
-
 ##############################################
-
-#for dim in range(step+1,150,step):
- 
-
+# hyperparameter tuning
 for index in range(2,20):    
     
     print(index)
@@ -274,8 +230,7 @@ for index in range(2,20):
     
     field2tree_DT = np.dot(qbasis, test_output_DT.T)
     
-    # error = np.abs(field2tree-field2pod)
-    
+
     error_KNN = np.abs(field2tree_KNN - original_test_field.T)
     
     error_DT = np.abs(field2tree_DT - original_test_field.T)
@@ -283,24 +238,6 @@ for index in range(2,20):
     error_linear = np.abs(field2tree_linear - original_test_field.T)
     
     error_pod = np.abs(field2pod - original_test_field.T)
-    
-    # linear_error = np.abs(np.load('linear_error.txt.npy'))
-    # KNN_error = np.abs(np.load('KNN_error.txt.npy'))
-    # DT_error =np.abs( np.load('DT_error.txt.npy'))
-    
-    # plt.plot(np.mean(linear_error,axis = 0),label = "linear error")
-    # plt.plot(np.mean(DT_error,axis = 0),label = "DT error")
-    # plt.plot(np.mean(KNN_error,axis = 0),label = "KNN error")
-    # #plt.plot(np.mean(field2pod,axis = 0),'r',label = "pod norm")
-    # #plt.plot(np.mean(field2tree,axis = 0),'g',label = "prediction norm")
-    # plt.legend()
-    # plt.show()
-    # plt.close()
-    
-    # plt.plot(np.mean(np.abs(test_output-true_test_output),axis = 0))
-    # plt.close()
-    
-    # print(np.mean(np.mean(DT_error,axis = 0)/np.mean(field2pod,axis = 0)))
     
     mean_error_KNN = (np.mean(np.mean(error_KNN,axis = 0)/np.mean(original_test_field.T,axis = 0)))
     
@@ -313,8 +250,7 @@ for index in range(2,20):
     std_error_KNN = (np.mean(np.std(error_KNN,axis = 0)/np.mean(original_test_field.T,axis = 0)))
     
     std_error_DT = (np.mean(np.std(error_DT,axis = 0)/np.mean(original_test_field.T,axis = 0)))
- 
-    
+     
     error_KNN_all.append(mean_error_KNN)
     
     error_DT_all.append(mean_error_DT)
@@ -326,30 +262,11 @@ for index in range(2,20):
     error_linear_all.append(mean_error_linear)
     
     error_pod_all.append(mean_error_pod)
-    
-    
-#np.savetxt('result/error_KNN_coeff.txt',error_KNN_all)
-
-#np.savetxt('result/error_DT_coeff.txt',error_DT_all)
-
-#np.savetxt('result/error_linear_all.txt',error_linear_all)
-
-
-# np.savetxt('result/KNN_time.txt', KNN_time)
-
-# np.savetxt('result/DT_time.txt',DT_time)
-
-# np.savetxt('result/linear_time.txt', linear_time)
 
 
 error_DT_all = np.loadtxt('result/error_DT_coeff.txt')[:18]
 
 error_KNN_all = np.loadtxt('result/error_KNN_coeff.txt')[:18]
-
-
-# DT_time = np.loadtxt('result/DT_time.txt')
-
-# KNN_time = np.loadtxt('result/KNN_time.txt')
 
 from matplotlib.pyplot import figure
 figure(num=None, figsize=(8, 3))
@@ -359,11 +276,6 @@ plt.plot( list(range(2,20)), np.array(error_KNN_all)*100,linewidth=3, label = 'e
 
 plt.plot( list(range(2,20)), np.array(std_KNN_all)*100, 'b--',linewidth = 3,label = 'std KNN')
 
-
-
-#plt.plot(list(range(step+1,150,step)), error_linear_all, 'y', label = 'error output')
-
-#plt.plot(np.array(error_pod_all)*100,'r', label = 'error pod')
 plt.xlabel("n_neighbour", fontsize = 16)
 plt.xticks(range(2,20))
 plt.ylabel("error in %", fontsize = 20)
@@ -379,9 +291,6 @@ figure(num=None, figsize=(8, 3))
 plt.plot( list(range(2,20)),np.array(error_DT_all)*100,'g', linewidth = 3, label = 'error DT')
 plt.plot( list(range(2,20)),np.array(std_DT_all)*100,'g--',linewidth = 3, label = 'std DT')
 
-#plt.plot(list(range(step+1,150,step)), error_linear_all, 'y', label = 'error output')
-
-#plt.plot(np.array(error_pod_all)*100,'r', label = 'error pod')
 plt.xlabel("samples_split", fontsize = 16)
 plt.xticks(range(2,20))
 plt.ylabel("error in %", fontsize = 20)
@@ -407,8 +316,6 @@ plt.show()
 
 figure(num=None, figsize=(8, 3))
 plt.plot(list(range(2,20)), DT_time,'g', linewidth = 3, label = 'DT_time')
-
-#plt.plot(list(range(step+1,150,step)), linear_time, 'y', label = 'linear_time')
 
 plt.xlabel("samples_split", fontsize = 16)
 plt.ylabel("time(s)", fontsize = 20)

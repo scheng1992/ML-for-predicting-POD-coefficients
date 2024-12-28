@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import time
 
 
+#chcek
 # check scikit-learn version
 import sklearn
 from sklearn.linear_model import LinearRegression
